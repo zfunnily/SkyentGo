@@ -42,12 +42,7 @@ type (
 		Decrypt([]byte) ([]byte, error)
 	}
 
-	ConnectionCallback func(IConnection)
-	CloseCallback      func(IConnection)
-	MessageCallback    func(IMessage)
-	TimerCallback      func(IConnection)
-
-	// 事件循环 Poll
+	// 事件 Poll
 	IPoll interface {
 		CreatePoll()
 		AddEvent()
@@ -60,6 +55,7 @@ type (
 	IContext interface {
 		Handle() uint32
 	}
+
 	// IConnection 链接
 	IConnection interface {
 		GetID() uint32

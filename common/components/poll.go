@@ -6,5 +6,7 @@ type SocketPoll struct {
 	sockFd   int
 	epFd     int
 	Events   []syscall.EpollEvent
-	EventMap map[int32]*Event
+	EventMap map[int]*Event
+
+	Loop *EventLoop
 }

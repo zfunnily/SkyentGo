@@ -1,25 +1,39 @@
 package components
 
+import "fmt"
+
+type LoopFunc func()
+
 type EventLoop struct {
-	Looping bool
-	Quit    bool
-	Poller  *SocketPoll
+	Quit   bool
+	Poller *SocketPoll
+}
+
+func NewEventLoop() *EventLoop {
+	loop := &EventLoop{
+		Quit: true,
+	}
+	loop.Poller = NewPoll(loop)
+	return loop
 }
 
 func (e *EventLoop) Loop() {
 	e.Quit = false
-	e.Looping = true
-	for e.Quit {
+	for !e.Quit {
 		err := e.Poller.Poll(func(event *Event) {
-			event.HandleEvents()
+			if event != nil {
+				event.HandleEvents()
+			}
 		})
 		if err != nil {
 			break
 		}
 	}
+	fmt.Println("loop exit")
 }
 
-func (e *EventLoop) RunInLoop() {
+func (e *EventLoop) RunInLoop(cb LoopFunc) {
+	cb()
 }
 
 func (e *EventLoop) UpdateEvent(event *Event) {

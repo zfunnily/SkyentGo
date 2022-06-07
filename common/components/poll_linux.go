@@ -5,84 +5,33 @@ import (
 	"syscall"
 )
 
-// CreatePoll EPoll
-func (p *SocketPoll) CreatePoll() {
-	fd, err := syscall.EpollCreate1(syscall.EPOLL_CLOEXEC)
+func NewPoll(Loop *EventLoop) *SocketPoll {
+	efd, err := syscall.EpollCreate1(syscall.EPOLL_CLOEXEC)
 	if err != nil {
 		panic(err)
 	}
-	p.epFd = fd
-}
-
-// AddReadWrite ...
-func (p *SocketPoll) AddReadWrite(fd int) {
-	if err := syscall.EpollCtl(p.epFd, syscall.EPOLL_CTL_ADD, fd,
-		&syscall.EpollEvent{Fd: int32(fd),
-			Events: syscall.EPOLLIN | syscall.EPOLLOUT,
-		},
-	); err != nil {
-		panic(err)
-	}
-}
-
-// AddRead ...
-func (p *SocketPoll) AddRead(fd int) {
-	if err := syscall.EpollCtl(p.epFd, syscall.EPOLL_CTL_ADD, fd,
-		&syscall.EpollEvent{Fd: int32(fd),
-			Events: syscall.EPOLLIN,
-		},
-	); err != nil {
-		panic(err)
-	}
-}
-
-// ModRead ...
-func (p *SocketPoll) ModRead(fd int) {
-	if err := syscall.EpollCtl(p.epFd, syscall.EPOLL_CTL_MOD, fd,
-		&syscall.EpollEvent{Fd: int32(fd),
-			Events: syscall.EPOLLIN,
-		},
-	); err != nil {
-		panic(err)
-	}
-}
-
-// ModReadWrite ...
-func (p *SocketPoll) ModReadWrite(fd int) {
-	if err := syscall.EpollCtl(p.epFd, syscall.EPOLL_CTL_MOD, fd,
-		&syscall.EpollEvent{Fd: int32(fd),
-			Events: syscall.EPOLLIN | syscall.EPOLLOUT,
-		},
-	); err != nil {
-		panic(err)
-	}
-}
-
-// ModDetach ...
-func (p *SocketPoll) ModDetach(fd int) {
-	if err := syscall.EpollCtl(p.epFd, syscall.EPOLL_CTL_DEL, fd,
-		&syscall.EpollEvent{Fd: int32(fd),
-			Events: syscall.EPOLLIN | syscall.EPOLLOUT,
-		},
-	); err != nil {
-		panic(err)
-	}
+	//syscall.SetNonblock(efd, true)
+	return &SocketPoll{epFd: efd, Loop: Loop, EventMap: make(map[int]*Event)}
 }
 
 func (p *SocketPoll) Poll(cb func(event *Event)) error {
 	p.Events = make([]syscall.EpollEvent, 64)
 	for {
-		n, err := syscall.EpollWait(p.epFd, p.Events, 100)
+		n, err := syscall.EpollWait(p.epFd, p.Events[:], -1)
 		if err != nil && err != syscall.EINTR {
 			return err
 		}
+		if n != 0 {
+			fmt.Println("wait n:", n)
+		}
 		for i := 0; i < n; i++ {
-			fd := p.Events[i].Fd
+			fd := int(p.Events[i].Fd)
 			eventM := p.EventMap[fd]
 			if eventM == nil {
-				eventM = NewEvent(fd)
-				eventM.SetEvents(p.Events[i].Events)
+				eventM = NewEvent(fd, p.Loop)
 			}
+			eventM.SetEvents(int(p.Events[i].Events))
+			p.EventMap[fd] = eventM
 			cb(eventM)
 		}
 	}
@@ -91,11 +40,11 @@ func (p *SocketPoll) Poll(cb func(event *Event)) error {
 func (p *SocketPoll) Update(operation int, event *Event) {
 	fd := event.Fd()
 	if err := syscall.EpollCtl(p.epFd, operation, int(fd),
-		&syscall.EpollEvent{Fd: fd,
-			Events: event.Events(),
+		&syscall.EpollEvent{Fd: int32(fd),
+			Events: uint32(event.Events()),
 		},
 	); err != nil {
-		fmt.Println(err)
+		fmt.Errorf(err.Error())
 	}
 }
 
@@ -105,10 +54,13 @@ func (p *SocketPoll) UpdateEvent(event *Event) {
 	if !ok {
 		p.EventMap[fd] = event
 		p.Update(syscall.EPOLL_CTL_ADD, event)
+		fmt.Println("event ADD: ", event.Events())
 	} else {
 		if event.IsNoEvent() {
+			fmt.Println("event DEL: ", event.Events())
 			p.Update(syscall.EPOLL_CTL_DEL, event)
 		} else {
+			fmt.Println("event MOD: ", event.Events())
 			p.Update(syscall.EPOLL_CTL_MOD, event)
 		}
 	}
@@ -119,27 +71,3 @@ func (p *SocketPoll) RemoveEvent(event *Event) {
 	p.Update(syscall.EPOLL_CTL_DEL, event)
 	delete(p.EventMap, fd)
 }
-
-//func (p *SocketPoll) Start() error {
-//	port := fmt.Sprintf(":%d", s.port)
-//
-//	l, err := net.Listen("tcp", port)
-//	if err != nil {
-//		return err
-//	}
-//
-//	s.Listener = l
-//
-//	var f *os.File
-//	switch netln := l.(type) {
-//	case nil:
-//	case *net.TCPListener:
-//		f, err = netln.File()
-//	}
-//	if err != nil {
-//		return err
-//	}
-//
-//	p.fd = int(f.Fd())
-//	return syscall.SetNonblock(s.fd, true)
-//}

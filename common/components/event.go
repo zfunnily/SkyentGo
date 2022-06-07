@@ -1,25 +1,44 @@
 package components
 
-import "syscall"
+import (
+	"fmt"
+	"syscall"
+)
 
 type EventCbk func()
-type ReadCbk func()
+type ReadEventCbk func()
 
 type Event struct {
-	fd      int32
-	events  uint32
-	revents uint32
+	fd      int
+	events  int
+	revents int
 
-	ReadCbk  ReadCbk
+	ReadCbk  ReadEventCbk
 	WriteCbk EventCbk
 	CloseCbk EventCbk
 	ErrorCbk EventCbk
 
-	Loop EventLoop
+	Loop *EventLoop
 }
 
-func NewEvent(fd int32) *Event {
-	return &Event{fd: fd}
+func NewEvent(fd int, loop *EventLoop) *Event {
+	return &Event{fd: fd, Loop: loop, events: 0, revents: 0}
+}
+
+func (e *Event) SetReadCbk(cbk ReadEventCbk) {
+	e.ReadCbk = cbk
+}
+
+func (e *Event) SetWriteCbk(cbk EventCbk) {
+	e.WriteCbk = cbk
+}
+
+func (e *Event) SetCloseCbk(cbk EventCbk) {
+	e.CloseCbk = cbk
+}
+
+func (e *Event) SetErrorCbk(cbk EventCbk) {
+	e.ErrorCbk = cbk
 }
 
 func (e *Event) Update() {
@@ -27,9 +46,10 @@ func (e *Event) Update() {
 }
 
 func (e *Event) Remove() {
+	e.Loop.RemoveEvent(e)
 }
 
-func (e *Event) Fd() int32 {
+func (e *Event) Fd() int {
 	return e.fd
 }
 
@@ -37,20 +57,12 @@ func (e *Event) IsNoEvent() bool {
 	return e.events == 0
 }
 
-func (e *Event) Events() uint32 {
+func (e *Event) Events() int {
 	return e.events
 }
 
-func (e *Event) SetEvents(event uint32) {
+func (e *Event) SetEvents(event int) {
 	e.revents = event
-}
-
-func (e *Event) IsWriting() uint32 {
-	return e.events & (syscall.EPOLLOUT)
-}
-
-func (e *Event) IsReading() uint32 {
-	return e.events & (syscall.EPOLLIN | syscall.EPOLLPRI)
 }
 
 func (e *Event) EnableConnecting() {
@@ -59,14 +71,12 @@ func (e *Event) EnableConnecting() {
 }
 
 func (e *Event) EnableReading() {
-	event := syscall.EPOLLIN | syscall.EPOLLPRI | syscall.EPOLLET
-	e.events |= uint32(event)
+	e.events |= syscall.EPOLLIN | syscall.EPOLLPRI | syscall.EPOLLHUP
 	e.Update()
 }
 
 func (e *Event) DisableReading() {
-	event := syscall.EPOLLIN | syscall.EPOLLPRI | syscall.EPOLLET
-	e.events &= uint32(event)
+	e.events &= ^(syscall.EPOLLIN | syscall.EPOLLPRI | syscall.EPOLLHUP)
 	e.Update()
 }
 
@@ -76,24 +86,52 @@ func (e *Event) EnableWriting() {
 }
 
 func (e *Event) DisableWriting() {
-	e.events &= syscall.EPOLLOUT
+	e.events &= ^syscall.EPOLLOUT
 	e.Update()
+}
+
+func (e *Event) DisableAll() {
+	e.events = 0
+	e.Update()
+}
+
+func (e *Event) IsWriting() int {
+	return e.events & (syscall.EPOLLOUT)
+}
+
+func (e *Event) IsReading() int {
+	return e.events & (syscall.EPOLLIN | syscall.EPOLLPRI)
 }
 
 func (e *Event) HandleEvents() {
 	if (e.revents&syscall.EPOLLHUP) > 0 && (e.revents&syscall.EPOLLIN) <= 0 {
 		// close
+		fmt.Println("handle events close: ", e.Fd())
+		if e.CloseCbk != nil {
+			e.CloseCbk()
+		}
 	}
 
 	if e.revents&(syscall.EPOLLIN|syscall.EPOLLPRI|syscall.EPOLLRDHUP) > 0 {
 		// read
+		fmt.Println("handle events read: ", e.Fd())
+		if e.ReadCbk != nil {
+			e.ReadCbk()
+		}
 	}
 
 	if e.revents&syscall.EPOLLOUT > 0 {
 		// write
+		fmt.Println("handle events write: ", e.Fd())
+		if e.WriteCbk != nil {
+			e.WriteCbk()
+		}
 	}
 
 	if e.revents&syscall.EPOLLERR > 0 {
 		// error
+		if e.ErrorCbk != nil {
+			e.ErrorCbk()
+		}
 	}
 }

@@ -1,14 +1,5 @@
 package common
 
-import (
-	"encoding/json"
-	"fmt"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
-	"pro2d/common/logger"
-	"strings"
-)
-
 type RedisConf struct {
 	Address string `json:"address"`
 	Auth    string `json:"auth"`
@@ -98,11 +89,11 @@ var (
 )
 
 func init() {
-	configFile, err := ioutil.ReadFile("conf/conf.yml")
-	if err != nil {
-		fmt.Printf("conf read faild: %v", err)
-		return
-	}
+	//configFile, err := ioutil.ReadFile("conf/conf.yml")
+	//if err != nil {
+	//	fmt.Printf("conf read faild: %v", err)
+	//	return
+	//}
 
 	//servList, err := ioutil.ReadFile("conf/serverlist.yml")
 	//if err != nil {
@@ -111,10 +102,10 @@ func init() {
 	//}
 
 	//初始化配置
-	if err = yaml.Unmarshal(configFile, &GlobalConf); err != nil {
-		fmt.Printf("config.yml unmarshal faild: %v\n", err)
-		return
-	}
+	//if err = yaml.Unmarshal(configFile, &GlobalConf); err != nil {
+	//	fmt.Printf("config.yml unmarshal faild: %v\n", err)
+	//	return
+	//}
 
 	////游戏服务列表
 	//if err = yaml.Unmarshal(servList, &GlobalConf.GameService); err != nil {
@@ -122,15 +113,15 @@ func init() {
 	//	return
 	//}
 
-	c, err := json.Marshal(&GlobalConf.LogConf)
-	if err != nil {
-		fmt.Errorf("log conf %v", err)
-		return
-	}
-	//初始化日志
-	err = logger.SetLogger(string(c), fmt.Sprintf("logs/%s", strings.ToLower(GlobalConf.GameConf.Name)))
-	if err != nil {
-		fmt.Errorf("log conf %v", err)
-		return
-	}
+	//c, err := json.Marshal(&GlobalConf.LogConf)
+	//if err != nil {
+	//	fmt.Errorf("log conf %v", err)
+	//	return
+	//}
+	////初始化日志
+	//err = logger.SetLogger(string(c), fmt.Sprintf("logs/%s", strings.ToLower(GlobalConf.GameConf.Name)))
+	//if err != nil {
+	//	fmt.Errorf("log conf %v", err)
+	//	return
+	//}
 }

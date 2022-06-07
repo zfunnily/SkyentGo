@@ -3,7 +3,6 @@ package components
 import (
 	"fmt"
 	"testing"
-	"time"
 )
 
 func PRINT() {
@@ -11,8 +10,8 @@ func PRINT() {
 }
 
 func TestTimeWheel_Start(t *testing.T) {
-	TimeOut(1*time.Second, func() {
-		fmt.Println("12312313123")
-	})
+	//TimeOut(1*time.Second, func() {
+	//	fmt.Println("12312313123")
+	//})
 	select {}
 }
