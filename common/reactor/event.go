@@ -76,7 +76,7 @@ func (e *Event) EnableReading() {
 }
 
 func (e *Event) DisableReading() {
-	e.events &= ^(syscall.EPOLLIN | syscall.EPOLLPRI | syscall.EPOLLHUP)
+	e.events &= ^(syscall.EPOLLIN | syscall.EPOLLPRI | syscall.EPOLLHUP) + 1
 	e.Update()
 }
 
@@ -86,7 +86,7 @@ func (e *Event) EnableWriting() {
 }
 
 func (e *Event) DisableWriting() {
-	e.events &= ^syscall.EPOLLOUT
+	e.events &= ^syscall.EPOLLOUT + 1
 	e.Update()
 }
 
