@@ -1,4 +1,4 @@
-package components
+package ccnet
 
 import (
 	"fmt"
@@ -15,11 +15,9 @@ const (
 )
 
 type TcpConnection struct {
-	IConnection
 	Loop      *EventLoop
 	Event     *Event
 	connState ConnState
-	splitter  ISplitter
 	name      string
 
 	Id           uint32

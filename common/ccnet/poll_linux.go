@@ -1,4 +1,4 @@
-package components
+package ccnet
 
 import (
 	"fmt"
@@ -10,14 +10,13 @@ func NewPoll(Loop *EventLoop) *SocketPoll {
 	if err != nil {
 		panic(err)
 	}
-	//syscall.SetNonblock(efd, true)
 	return &SocketPoll{epFd: efd, Loop: Loop, EventMap: make(map[int]*Event)}
 }
 
 func (p *SocketPoll) Poll(cb func(event *Event)) error {
 	p.Events = make([]syscall.EpollEvent, 64)
 	for {
-		n, err := syscall.EpollWait(p.epFd, p.Events[:], -1)
+		n, err := syscall.EpollWait(p.epFd, p.Events, -1)
 		if err != nil && err != syscall.EINTR {
 			return err
 		}

@@ -1,4 +1,4 @@
-package components
+package skynet
 
 type CtxCallback func(ctx *Context, cbud interface{}, data interface{}, typ int)
 

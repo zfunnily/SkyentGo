@@ -1,4 +1,4 @@
-package components
+package skynet
 
 const (
 	PTYPE_TEXT     = 0

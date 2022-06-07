@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"pro2d/common/components"
+	ccnet2 "pro2d/common/ccnet"
 )
 
 type EchoServer struct {
-	Server *components.TcpServer
+	Server *ccnet2.TcpServer
 }
 
-func NewEchoServer(loop *components.EventLoop, port int) *EchoServer {
-	s, err := components.NewTcpServer(loop, port, "echo")
+func NewEchoServer(loop *ccnet2.EventLoop, port int) *EchoServer {
+	s, err := ccnet2.NewTcpServer(loop, port, "echo")
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil
@@ -21,11 +21,11 @@ func NewEchoServer(loop *components.EventLoop, port int) *EchoServer {
 	return e
 }
 
-func (s *EchoServer) OnConnect(conn *components.TcpConnection) {
+func (s *EchoServer) OnConnect(conn *ccnet2.TcpConnection) {
 	fmt.Println("a new conn")
 }
 
-func (s *EchoServer) OnMessage(conn *components.TcpConnection, buffer *components.Buffer) {
+func (s *EchoServer) OnMessage(conn *ccnet2.TcpConnection, buffer *ccnet2.Buffer) {
 	fmt.Printf("recv msg: %s\n", buffer.Peek()[:buffer.ReadableBytes()])
 	conn.Send(buffer)
 	buffer.RetrieveAll()
@@ -35,7 +35,7 @@ func (s *EchoServer) Start() error {
 	return s.Server.Start()
 }
 func main() {
-	loop := components.NewEventLoop()
+	loop := ccnet2.NewEventLoop()
 	e := NewEchoServer(loop, 80)
 	if e == nil {
 		return

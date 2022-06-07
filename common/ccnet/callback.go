@@ -1,9 +1,9 @@
-package components
+package ccnet
 
 type (
 	ConnectionCallback    func(*TcpConnection)
 	CloseCallback         func(*TcpConnection)
 	MessageCallback       func(*TcpConnection, *Buffer)
-	TimerCallback         func(IConnection)
+	TimerCallback         func(*TcpConnection)
 	WriteCompleteCallback func(*TcpConnection)
 )

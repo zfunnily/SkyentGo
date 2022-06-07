@@ -1,4 +1,9 @@
-package components
+package skynet
+
+import (
+	"pro2d/common/ccnet"
+	"pro2d/common/components"
+)
 
 const (
 	DATA   = 0
@@ -24,46 +29,46 @@ type SocketMessage struct {
 
 type ServerOption func(*SocketServer)
 
-func WithPlugin(iPlugin IPlugin) ServerOption {
+func WithPlugin(iPlugin components.IPlugin) ServerOption {
 	return func(server *SocketServer) {
 		server.plugins = iPlugin
 	}
 }
 
-func WithSplitter(splitter ISplitter) ServerOption {
+func WithSplitter(splitter components.ISplitter) ServerOption {
 	return func(server *SocketServer) {
 		server.splitter = splitter
 	}
 }
 
-func WithConnCbk(cb ConnectionCallback) ServerOption {
+func WithConnCbk(cb ccnet.ConnectionCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.connectionCallback = cb
 	}
 }
 
-func WithMsgCbk(cb MessageCallback) ServerOption {
+func WithMsgCbk(cb ccnet.MessageCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.messageCallback = cb
 	}
 }
 
-func WithCloseCbk(cb CloseCallback) ServerOption {
+func WithCloseCbk(cb ccnet.CloseCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.closeCallback = cb
 	}
 }
 
-func WithTimerCbk(cb TimerCallback) ServerOption {
+func WithTimerCbk(cb ccnet.TimerCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.timerCallback = cb
 	}
 }
 
-func NewServer(port int, options ...ServerOption) IServer {
+func NewServer(port int, options ...ServerOption) components.IServer {
 	s := &SocketServer{
 		port:       port,
-		connManage: NewConnManage(),
+		connManage: components.NewConnManage(),
 		Ctx:        NewContext(),
 	}
 	for _, option := range options {
@@ -127,7 +132,7 @@ func (s *SocketServer) AddEvent() {
 func (s *SocketServer) DelEvent() {
 }
 
-func (s *SocketServer) newConnection(conn IConnection) {
+func (s *SocketServer) newConnection(conn components.IConnection) {
 	conn.SetConnectionCallback(s.connectionCallback)
 	conn.SetCloseCallback(s.removeConnection)
 	conn.SetMessageCallback(s.messageCallback)
@@ -136,7 +141,7 @@ func (s *SocketServer) newConnection(conn IConnection) {
 	conn.Start()
 }
 
-func (s *SocketServer) removeConnection(conn IConnection) {
+func (s *SocketServer) removeConnection(conn components.IConnection) {
 	s.closeCallback(conn)
 }
 

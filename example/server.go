@@ -2,22 +2,22 @@ package main
 
 import (
 	"fmt"
-	"pro2d/common/components"
+	"pro2d/common/skynet"
 )
 
-func ACbk(ctx *components.Context, cbud interface{}, data []byte, typ int) {
+func ACbk(ctx *skynet.Context, cbud interface{}, data []byte, typ int) {
 	fmt.Printf("A recv type %d: %s\n", typ, string(data))
 }
 
-func BCbk(ctx *components.Context, cbud interface{}, data []byte, typ int) {
+func BCbk(ctx *skynet.Context, cbud interface{}, data []byte, typ int) {
 	fmt.Printf("B recv type %d: %s\n", typ, string(data))
 }
 
 func main() {
-	components.MAInst().Start()
+	skynet.MAInst().Start()
 
-	ACtx := components.NewContext()
-	BCtx := components.NewContext()
+	ACtx := skynet.NewContext()
+	BCtx := skynet.NewContext()
 	ACtx.Callback(nil, ACbk)
 	BCtx.Callback(nil, BCbk)
 
@@ -29,6 +29,6 @@ func main() {
 	ret = BCtx.Send(uint32(0), ACtx.Handle(), 1, 1, s2)
 	fmt.Println("BCtx ret: ", ret)
 
-	components.TWInst().TimeOut(ACtx.Handle(), 0, 1)
+	skynet.TWInst().TimeOut(ACtx.Handle(), 0, 1)
 	select {}
 }

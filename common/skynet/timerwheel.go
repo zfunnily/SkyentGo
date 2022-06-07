@@ -1,4 +1,4 @@
-package components
+package skynet
 
 import (
 	"container/list"
