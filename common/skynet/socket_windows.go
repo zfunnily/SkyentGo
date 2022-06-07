@@ -1,8 +1,8 @@
 package skynet
 
 import (
-	"pro2d/common/ccnet"
 	"pro2d/common/components"
+	"pro2d/common/reactor"
 )
 
 const (
@@ -41,25 +41,25 @@ func WithSplitter(splitter components.ISplitter) ServerOption {
 	}
 }
 
-func WithConnCbk(cb ccnet.ConnectionCallback) ServerOption {
+func WithConnCbk(cb reactor.ConnectionCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.connectionCallback = cb
 	}
 }
 
-func WithMsgCbk(cb ccnet.MessageCallback) ServerOption {
+func WithMsgCbk(cb reactor.MessageCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.messageCallback = cb
 	}
 }
 
-func WithCloseCbk(cb ccnet.CloseCallback) ServerOption {
+func WithCloseCbk(cb reactor.CloseCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.closeCallback = cb
 	}
 }
 
-func WithTimerCbk(cb ccnet.TimerCallback) ServerOption {
+func WithTimerCbk(cb reactor.TimerCallback) ServerOption {
 	return func(server *SocketServer) {
 		server.timerCallback = cb
 	}

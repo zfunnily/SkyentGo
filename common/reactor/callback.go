@@ -1,4 +1,4 @@
-package ccnet
+package reactor
 
 type (
 	ConnectionCallback    func(*TcpConnection)

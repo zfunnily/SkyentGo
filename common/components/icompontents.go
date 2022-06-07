@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"pro2d/common/ccnet"
+	"pro2d/common/reactor"
 	"reflect"
 )
 
@@ -67,10 +67,10 @@ type (
 		CustomChan() chan<- func()
 		GetCtx() IContext
 
-		SetConnectionCallback(ccnet.ConnectionCallback)
-		SetMessageCallback(ccnet.MessageCallback)
-		SetCloseCallback(ccnet.CloseCallback)
-		SetTimerCallback(ccnet.TimerCallback)
+		SetConnectionCallback(reactor.ConnectionCallback)
+		SetMessageCallback(reactor.MessageCallback)
+		SetCloseCallback(reactor.CloseCallback)
+		SetTimerCallback(reactor.TimerCallback)
 	}
 	// IConnManage connManage
 	IConnManage interface {
@@ -99,10 +99,10 @@ type (
 		SetActions(map[interface{}]interface{})
 		GetConnManage() IConnManage
 
-		SetConnectionCallback(ccnet.ConnectionCallback)
-		SetMessageCallback(ccnet.MessageCallback)
-		SetCloseCallback(ccnet.CloseCallback)
-		SetTimerCallback(ccnet.TimerCallback)
+		SetConnectionCallback(reactor.ConnectionCallback)
+		SetMessageCallback(reactor.MessageCallback)
+		SetCloseCallback(reactor.CloseCallback)
+		SetTimerCallback(reactor.TimerCallback)
 	}
 	IAgent interface {
 		GetSchema() ISchema

@@ -2,8 +2,8 @@ package skynet
 
 import (
 	"net"
-	"pro2d/common/ccnet"
 	"pro2d/common/components"
+	"pro2d/common/reactor"
 )
 
 type SocketServer struct {
@@ -15,10 +15,10 @@ type SocketServer struct {
 	plugins    components.IPlugin
 	splitter   components.ISplitter
 
-	connectionCallback ccnet.ConnectionCallback
-	messageCallback    ccnet.MessageCallback
-	closeCallback      ccnet.CloseCallback
-	timerCallback      ccnet.TimerCallback
+	connectionCallback reactor.ConnectionCallback
+	messageCallback    reactor.MessageCallback
+	closeCallback      reactor.CloseCallback
+	timerCallback      reactor.TimerCallback
 
 	port       int
 	connManage components.IConnManage
@@ -72,18 +72,18 @@ func (s *SocketServer) GetConnManage() components.IConnManage {
 	return s.connManage
 }
 
-func (s *SocketServer) SetConnectionCallback(cb ccnet.ConnectionCallback) {
+func (s *SocketServer) SetConnectionCallback(cb reactor.ConnectionCallback) {
 	s.connectionCallback = cb
 }
 
-func (s *SocketServer) SetMessageCallback(cb ccnet.MessageCallback) {
+func (s *SocketServer) SetMessageCallback(cb reactor.MessageCallback) {
 	s.messageCallback = cb
 }
 
-func (s *SocketServer) SetCloseCallback(cb ccnet.CloseCallback) {
+func (s *SocketServer) SetCloseCallback(cb reactor.CloseCallback) {
 	s.closeCallback = cb
 }
 
-func (s *SocketServer) SetTimerCallback(cb ccnet.TimerCallback) {
+func (s *SocketServer) SetTimerCallback(cb reactor.TimerCallback) {
 	s.timerCallback = cb
 }

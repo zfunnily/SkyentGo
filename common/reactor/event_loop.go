@@ -1,4 +1,4 @@
-package ccnet
+package reactor
 
 import "fmt"
 
